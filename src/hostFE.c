@@ -10,7 +10,6 @@ void hostFE(int filterWidth, float *filter, int imageHeight, int imageWidth,
 
     int filt_size = filterWidth * filterWidth * sizeof(float);
     int data_size = imageHeight *  imageWidth * sizeof(float);
-    int half_filter = filterWidth / 2;
 
     cl_int status;
     cl_command_queue first_queue = clCreateCommandQueue(*context, *device, 0, &status);;
@@ -28,7 +27,7 @@ void hostFE(int filterWidth, float *filter, int imageHeight, int imageWidth,
     clSetKernelArg(kernel, 2, sizeof(cl_mem), &filter_mem);
     clSetKernelArg(kernel, 3, sizeof(int), &imageHeight);
     clSetKernelArg(kernel, 4, sizeof(int), &imageWidth);
-    clSetKernelArg(kernel, 5, sizeof(int), &half_filter);
+    clSetKernelArg(kernel, 5, sizeof(int), &filterWidth);
 
 
     //---------------------------- set workgroup sizes ----------------------
