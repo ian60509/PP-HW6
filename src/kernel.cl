@@ -1,35 +1,34 @@
 __kernel void convolution(
-   	const __global float* inp_dat, __global float4* oup_dat, __constant float* fil_dat,
-   	const int imageHeight, const int imageWidth, const int half_fitr) {
+   	const __global float* input, __global float4* ouput, __constant float* filter_mem,
+   	const int imageHeight, const int imageWidth, const int half_filter) {
 
 	int gid = get_global_id(0);
 	int idx = gid * 4;
 
-	int poi_x = idx / imageWidth;
-	int poi_y = idx % imageWidth;
+	int row = idx / imageWidth;
+	int col = idx % imageWidth;
 
-	float4 ans = (0.0, 0.0, 0.0, 0.0), tmp, fil;
+	float4 ans = (0.0, 0.0, 0.0, 0.0); //4 float
+    float4 tmp, fil;
 
 	int i, j, filter_idx = 0;
-	int now_x, now_y, poi;
-	for (i = -half_fitr; i <= half_fitr; ++i) {
+	int cur_x, cur_y, position;
+	for (i = -half_filter; i <= half_filter; ++i) {
 
-		now_x = poi_x + i;
-		if (now_x < 0 || now_x >= imageHeight) continue;
+		cur_x = row + i;
 		
-		int wx = now_x * imageWidth;
-		for (j = -half_fitr; j <= half_fitr; ++j, ++filter_idx) {
+		for (j = -half_filter; j <= half_filter; ++j, ++filter_idx) {
 			
-			now_y = poi_y + j;
-			if (now_y < 0 || now_y >= imageWidth) continue;
-
-			poi = wx + now_y;
+			cur_y = col + j;
+            if(cur_y>=0 && cur_y<imageWidth && cur_x>=0 && cur_x<imageHeight){
+                position = (cur_x * imageWidth) + cur_y;
 			
-			tmp = (float4)(inp_dat[poi], inp_dat[poi+1], inp_dat[poi+2], inp_dat[poi+3]);
-			fil = fil_dat[filter_idx];
+                tmp = (float4)(input[position], input[position+1], input[position+2], input[position+3]);
+                fil = filter_mem[filter_idx];
 
-			ans += tmp * fil;
+                ans += tmp * fil;
+            }
 		}
 	}
-	oup_dat[gid] = ans;
+	ouput[gid] = ans;
 }
